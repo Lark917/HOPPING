@@ -2,10 +2,10 @@
   <!-- 顶部导航栏 -->
   <div class="mx-8 mt-4 mb-8">
     <div class="flex items-center justify-between bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-2xl">
-      <!-- 左侧：T&W 标题 -->
+      <!-- 左侧：HOPPING 标题 -->
         <div class="flex items-center ml-6">
           <h1 class="text-4xl font-bold bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent animate-gradient bg-[length:200%_auto] tracking-[0.2em] drop-shadow-2xl hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-700">
-            T&W
+            HOPPING
           </h1>
         </div>
       
