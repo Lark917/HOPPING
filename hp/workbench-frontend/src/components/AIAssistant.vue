@@ -103,8 +103,8 @@ const inputMessage = ref('')
 const isLoading = ref(false)
 const chatContainer = ref<HTMLElement>()
 
-// API配置 - 使用后端代理避免CORS问题
-const API_URL = 'http://localhost:3001/api/ai-chat' // 使用后端代理
+// API配置 - 使用Vercel Serverless Function
+const API_URL = '/api/ai-chat' // 使用相对路径，适配Vercel部署
 
 // 发送消息
 async function sendMessage() {

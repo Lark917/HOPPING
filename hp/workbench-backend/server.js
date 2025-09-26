@@ -9,12 +9,36 @@ const app = express()
 const PORT = process.env.PORT || 3001
 
 // 中间件 - 配置CORS允许前端域名
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:8080'],
+const corsOptions = {
+  origin: function (origin, callback) {
+    // 允许本地开发
+    const allowedLocal = ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:8080', 'http://localhost:3000']
+    
+    // 允许Vercel域名
+    const allowedVercel = /https://.*-frontend\.vercel\.app$/
+    
+    // 允许GitHub Pages
+    const allowedGitHub = /https:\/\/.*\.github\.io$/
+    
+    if (!origin) {
+      // 允许非浏览器请求（如移动端、Postman等）
+      callback(null, true)
+    } else if (
+      allowedLocal.includes(origin) ||
+      allowedVercel.test(origin) ||
+      allowedGitHub.test(origin)
+    ) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}))
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
@@ -75,7 +99,7 @@ app.post('/api/ai-chat', async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer sk-5M04vngBk5dodcSG6lMzmfZOTTihO1ic8eWCXwHOpWO6ZzV0`
+        'Authorization': `Bearer ${process.env.KIMI_API_KEY}`
       },
       body: JSON.stringify({
         model,
@@ -130,7 +154,7 @@ app.get('/api/test-ai', async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer sk-5M04vngBk5dodcSG6lMzmfZOTTihO1ic8eWCXwHOpWO6ZzV0`
+        'Authorization': `Bearer ${process.env.KIMI_API_KEY}`
       },
       body: JSON.stringify({
         model: 'moonshot-v1-8k',

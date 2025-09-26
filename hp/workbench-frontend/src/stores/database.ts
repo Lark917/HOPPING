@@ -227,20 +227,23 @@ class DatabaseService {
 
   // 自动清理30天前的笔记
   private startCleanupTask() {
-    setInterval(async () => {
-      try {
-        const notes = await this.getNotes()
-        const expiredNotes = notes.filter(note => 
-          Date.now() - note.createdAt.getTime() > 30 * 24 * 60 * 60 * 1000
-        )
-        
-        await Promise.all(expiredNotes.map(note => this.deleteNote(note.id)))
-        
-        console.log(`Cleaned up ${expiredNotes.length} expired notes`)
-      } catch (error) {
-        console.error('Error during cleanup:', error)
-      }
-    }, 24 * 60 * 60 * 1000) // 每天清理一次
+    // 延迟启动清理任务，避免初始化时冲突
+    setTimeout(() => {
+      setInterval(async () => {
+        try {
+          const notes = await this.getNotes()
+          const expiredNotes = notes.filter(note => 
+            Date.now() - note.createdAt.getTime() > 30 * 24 * 60 * 60 * 1000
+          )
+          
+          await Promise.all(expiredNotes.map(note => this.deleteNote(note.id)))
+          
+          console.log(`Cleaned up ${expiredNotes.length} expired notes`)
+        } catch (error) {
+          console.error('Error during cleanup:', error)
+        }
+      }, 24 * 60 * 60 * 1000) // 每天清理一次
+    }, 5000) // 5秒后开始
   }
 }
 
