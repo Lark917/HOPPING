@@ -1,15 +1,15 @@
 <template>
   <div>
-    <!-- 项目分类标签 -->
-    <div class="flex space-x-2 mb-4">
+    <!-- 项目分类标签 - 响应式设计 -->
+    <div class="flex space-x-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
       <button
         v-for="tab in tabs"
         :key="tab.value"
         @click="activeTab = tab.value"
         :class="[
-          'px-3 py-1 rounded-md text-sm',
+          'flex-shrink-0 px-3 py-1 rounded-md text-sm transition-all duration-300',
           activeTab === tab.value 
-            ? 'bg-white/30 text-white font-semibold' 
+            ? 'bg-white/30 text-white font-semibold shadow-md' 
             : 'text-white/70 hover:bg-white/20'
         ]"
       >
@@ -18,56 +18,63 @@
     </div>
 
     <!-- 项目列表 -->
-    <div class="space-y-3 max-h-96 overflow-y-auto">
+    <div class="space-y-3 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
       <div
         v-for="project in filteredProjects"
         :key="project.id"
-        class="glass-card p-4 hover:bg-white/30 cursor-pointer transition-all"
+        class="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
         @click="selectProject(project)"
       >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <div 
-              class="w-4 h-4 rounded-full"
-              :style="{ backgroundColor: project.color }"
-            ></div>
-            <div>
-              <h4 class="font-medium text-white">{{ project.name }}</h4>
-              <p v-if="project.manager" class="text-sm text-white/70">
-                👤 {{ project.manager }}
-              </p>
-              <p class="text-sm text-white/70">
-                {{ formatDateRange(project.startDate, project.endDate) }}
-              </p>
-              <p v-if="project.description" class="text-xs text-white/60">
-                {{ project.description }}
-              </p>
-              <p v-if="project.progressDescription" class="text-xs text-green-300 mt-1">
-                📈 {{ project.progressDescription }}
-              </p>
-              <p v-if="project.progress === 100" class="text-xs text-yellow-300 mt-1">
-                ✅ 项目已完成
-              </p>
+        <div class="flex flex-col gap-3">
+          <!-- 项目基本信息 -->
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3 flex-1 min-w-0">
+              <div 
+                class="w-4 h-4 rounded-full mt-1"
+                :style="{ backgroundColor: project.color }"
+              ></div>
+              <div class="flex-1">
+                <h4 class="font-medium text-white truncate">{{ project.name }}</h4>
+                <p v-if="project.manager" class="text-sm text-white/70 mt-1">
+                  👤 {{ project.manager }}
+                </p>
+                <p class="text-sm text-white/70 mt-1">
+                  {{ formatDateRange(project.startDate, project.endDate) }}
+                </p>
+                <p v-if="project.description" class="text-xs text-white/60 mt-1 line-clamp-2">
+                  {{ project.description }}
+                </p>
+              </div>
+            </div>
+            
+            <div class="text-right">
+              <div class="text-sm text-white/80 whitespace-nowrap">
+                {{ getProjectTaskCount(project.id) }} 个任务
+              </div>
+              <div class="text-xs text-white/60 whitespace-nowrap">
+                {{ project.progress || getProjectProgress(project.id) }}%
+              </div>
             </div>
           </div>
           
-          <div class="text-right">
-            <div class="text-sm text-white/80">
-              {{ getProjectTaskCount(project.id) }} 个任务
+          <!-- 项目状态标签 -->
+          <div class="flex gap-2">
+            <div v-if="project.progressDescription" class="bg-white/10 backdrop-blur-sm rounded-md px-2 py-0.5 text-xs text-green-300">
+              📈 {{ project.progressDescription }}
             </div>
-            <div class="text-xs text-white/60">
-              {{ project.progress || getProjectProgress(project.id) }}%
+            <div v-if="project.progress === 100" class="bg-white/10 backdrop-blur-sm rounded-md px-2 py-0.5 text-xs text-yellow-300">
+              ✅ 项目已完成
             </div>
           </div>
-        </div>
-        
-        <!-- 进度条 -->
-        <div class="mt-2">
-          <div class="w-full bg-white/20 rounded-full h-2">
-            <div 
-              class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
-              :style="{ width: (project.progress || getProjectProgress(project.id)) + '%' }"
-            ></div>
+          
+          <!-- 进度条 -->
+          <div class="mt-2">
+            <div class="w-full bg-white/20 rounded-full h-2">
+              <div 
+                class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
+                :style="{ width: (project.progress || getProjectProgress(project.id)) + '%' }"
+              ></div>
+            </div>
           </div>
         </div>
       </div>

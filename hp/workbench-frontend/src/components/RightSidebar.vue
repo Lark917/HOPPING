@@ -1,22 +1,22 @@
 <template>
   <!-- 右侧边栏 -->
-  <div class="w-80 flex flex-col gap-4">
+  <div class="w-80 flex flex-col gap-4 p-2">
       <!-- 日历模块 -->
-      <div class="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300">
-        <h3 class="text-white font-semibold mb-3 flex items-center">
+      <div class="bg-white/10 backdrop-blur-xl rounded-2xl p-5 border border-white/20 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300">
+        <h3 class="text-white font-semibold mb-3 flex items-center text-lg">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           日历
         </h3>
         <div class="grid grid-cols-7 gap-1 text-xs">
-          <div v-for="day in weekDays" :key="day" class="text-center text-gray-300 font-medium">
+          <div v-for="day in weekDays" :key="day" class="text-center text-gray-300 font-medium py-1">
             {{ day }}
           </div>
           <div 
             v-for="(date, index) in calendarDates" 
             :key="index"
-            class="text-center py-2 rounded cursor-pointer transition-colors text-sm"
+            class="text-center py-2 sm:py-3 rounded-lg cursor-pointer transition-all text-sm sm:text-base aspect-square flex items-center justify-center"
             :class="{
               'text-white hover:bg-white/20': !date.isToday && !date.hasDeadline,
               'bg-blue-500 text-white': date.isToday,
@@ -24,6 +24,7 @@
               'text-gray-500': !date.currentMonth
             }"
             @click="handleDateClick(date)"
+            aria-label="{{ date.day }}号"
           >
             {{ date.day }}
           </div>
@@ -31,8 +32,8 @@
       </div>
 
       <!-- 计算器模块 -->
-      <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 flex-1">
-        <h3 class="text-white font-semibold mb-4 flex items-center">
+      <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 flex-1">
+        <h3 class="text-white font-semibold mb-4 flex items-center text-lg">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
@@ -42,17 +43,19 @@
           <input 
             v-model="calcInput" 
             type="text" 
-            class="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white placeholder-gray-400 text-right text-lg"
+            class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-400 text-right text-xl font-medium"
             placeholder="0"
             readonly
+            id="calculator-display"
           >
           <div class="grid grid-cols-4 gap-2">
             <button 
               v-for="btn in calcButtons" 
               :key="btn"
               @click="handleCalcClick(btn)"
-              class="bg-white/10 hover:bg-white/20 border border-white/20 rounded text-white py-2 transition-colors text-sm"
-              :class="{ 'bg-blue-500 hover:bg-blue-600': ['=', '+', '-', '*', '/'].includes(btn) }"
+              class="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white py-3 sm:py-4 transition-all duration-200 text-base sm:text-lg font-medium hover:scale-105 active:scale-95"
+              :class="{ 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600': ['=', '+', '-', '*', '/'].includes(btn) }"
+              :aria-label="btn === '=' ? '等于' : btn === '+' ? '加' : btn === '-' ? '减' : btn === '*' ? '乘' : btn === '/' ? '除' : btn === '.' ? '小数点' : '数字' + btn"
             >
               {{ btn }}
             </button>

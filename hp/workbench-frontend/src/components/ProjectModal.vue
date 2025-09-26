@@ -1,18 +1,23 @@
 <template>
-  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
-    <div class="glass-card p-6 w-full max-w-md mx-4">
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+    <div class="glass-card p-5 sm:p-6 w-full max-w-md mx-auto rounded-2xl sm:rounded-3xl">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-white font-semibold">新建项目</h3>
+        <h3 class="text-white font-semibold text-lg sm:text-xl">新建项目</h3>
         <button
           @click="$emit('close')"
-          class="text-white/60 hover:text-white"
+          class="text-white/60 hover:text-white transition-colors duration-300"
+          aria-label="关闭"
         >
-          ×
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
       
-      <form @submit.prevent="createProject" class="space-y-4">
-        <div>
+      <form @submit.prevent="createProject" class="space-y-5">
+        <!-- 项目名称 -->
+        <div class="bg-white/5 p-3 rounded-lg">
           <label class="block text-white text-sm mb-1">项目名称</label>
           <input
             v-model="form.name"
@@ -20,74 +25,88 @@
             required
             class="glass-input w-full"
             placeholder="输入项目名称"
+            id="project-name"
           />
         </div>
         
-        <div>
+        <!-- 项目负责人 -->
+        <div class="bg-white/5 p-3 rounded-lg">
           <label class="block text-white text-sm mb-1">项目负责人（可选）</label>
           <input
             v-model="form.manager"
             type="text"
             class="glass-input w-full"
             placeholder="输入项目负责人姓名"
+            id="project-manager"
           />
         </div>
         
-        <div>
+        <!-- 描述 -->
+        <div class="bg-white/5 p-3 rounded-lg">
           <label class="block text-white text-sm mb-1">描述（可选）</label>
           <textarea
             v-model="form.description"
-            class="glass-input w-full h-20 resize-none"
+            class="glass-input w-full h-20 sm:h-28 resize-none"
             placeholder="添加项目描述"
+            id="project-description"
           ></textarea>
         </div>
         
-        <div>
-          <label class="block text-white text-sm mb-1">颜色</label>
-          <div class="flex space-x-2">
+        <!-- 颜色选择 -->
+        <div class="bg-white/5 p-3 rounded-lg">
+          <label class="block text-white text-sm mb-2">颜色</label>
+          <div class="flex flex-wrap gap-2">
             <button
               v-for="color in colors"
               :key="color"
               type="button"
               :class="[
-                'w-8 h-8 rounded-full border-2',
+                'w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-transform duration-200 hover:scale-110',
                 form.color === color 
-                  ? 'border-white' 
+                  ? 'border-white ring-2 ring-offset-2 ring-purple-500 ring-offset-transparent' 
                   : 'border-transparent'
               ]"
               :style="{ backgroundColor: color }"
               @click="form.color = color"
+              :aria-label="`选择颜色 ${color}`"
             ></button>
           </div>
         </div>
         
-        <div>
-          <label class="block text-white text-sm mb-1">开始日期</label>
-          <input
-            v-model="form.startDate"
-            type="date"
-            required
-            class="glass-input w-full"
-          />
-        </div>
-        
-        <div>
-          <label class="block text-white text-sm mb-1">结束日期</label>
-          <input
-            v-model="form.endDate"
-            type="date"
-            required
-            class="glass-input w-full"
-          />
+        <!-- 日期选择 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="bg-white/5 p-3 rounded-lg">
+            <label class="block text-white text-sm mb-1">开始日期</label>
+            <input
+              v-model="form.startDate"
+              type="date"
+              required
+              class="glass-input w-full"
+              id="project-start-date"
+            />
+          </div>
+          
+          <div class="bg-white/5 p-3 rounded-lg">
+            <label class="block text-white text-sm mb-1">结束日期</label>
+            <input
+              v-model="form.endDate"
+              type="date"
+              required
+              class="glass-input w-full"
+              id="project-end-date"
+            />
+          </div>
         </div>
 
         <!-- 项目进度设置 -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
+        <div class="bg-white/5 p-3 rounded-lg">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
             <label class="block text-white text-sm mb-1">项目进度</label>
-            <span class="text-white text-sm font-semibold bg-gradient-to-r from-purple-500 to-pink-500 px-2 py-1 rounded-full">{{ form.progress }}%</span>
+            <span class="text-white text-sm font-semibold bg-gradient-to-r from-purple-500 to-pink-500 px-2 py-1 rounded-full inline-block w-fit">
+              {{ form.progress }}%
+            </span>
           </div>
-          <div class="w-full bg-white/20 rounded-full h-3 mb-2 shadow-inner">
+          <div class="w-full bg-white/20 rounded-full h-3 mb-3 shadow-inner">
             <div 
               class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500 ease-out shadow-lg"
               :style="{ width: form.progress + '%' }"
@@ -99,25 +118,30 @@
             min="0"
             max="100"
             class="w-full mt-2 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider transition-all duration-300 hover:h-3"
+            id="project-progress"
+            aria-label="项目进度"
           />
         </div>
         
         <!-- 进度描述 -->
-        <div>
+        <div class="bg-white/5 p-3 rounded-lg">
           <label class="block text-white text-sm mb-1">进度描述（可选）</label>
           <textarea
             v-model="form.progressDescription"
-            class="glass-input w-full h-16 resize-none text-sm"
+            class="glass-input w-full h-16 sm:h-24 resize-none text-sm"
             placeholder="描述当前项目进展情况..."
             maxlength="200"
+            id="project-progress-description"
           ></textarea>
-          <p class="text-xs text-white/50 mt-1">{{ form.progressDescription.length }}/200 字符</p>
+          <p class="text-xs text-white/50 mt-1 flex justify-between items-center">
+            <span>{{ form.progressDescription.length }}/200 字符</span>
+          </p>
         </div>
         
         <div class="flex justify-end mt-6">
           <button
             type="submit"
-            class="glass-button px-6 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
+            class="glass-button px-6 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25 w-full sm:w-auto"
           >
             创建项目
           </button>

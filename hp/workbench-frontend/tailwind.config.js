@@ -15,6 +15,13 @@ export default {
           dark: 'rgba(0, 0, 0, 0.2)',
           blue: 'rgba(59, 130, 246, 0.2)',
         }
+      },
+      screens: {
+        'xs': '360px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
       }
     },
   },
