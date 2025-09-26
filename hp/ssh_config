@@ -1,0 +1,9 @@
+# GitHub SSH配置
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+  PreferredAuthentications publickey
+  IdentitiesOnly yes
+  ServerAliveInterval 60
+  ServerAliveCountMax 5

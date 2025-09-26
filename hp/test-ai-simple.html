@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI助手简单测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI助手功能测试</h1>
+        
+        <div class="test-section">
+            <h3>1. 后端API连接测试</h3>
+            <p>测试后端服务器是否正常运行</p>
+            <button onclick="testBackendConnection()">测试后端连接</button>
+            <div id="backend-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. AI聊天功能测试</h3>
+            <p>测试AI助手对话功能</p>
+            <button onclick="testAIChat()">测试AI聊天</button>
+            <div id="ai-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 前端应用测试</h3>
+            <p>打开前端应用进行完整测试</p>
+            <button onclick="openFrontend()">打开前端应用</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001';
+        const FRONTEND_URL = 'http://localhost:5176';
+
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = content;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        async function testBackendConnection() {
+            const resultElement = 'backend-result';
+            showResult(resultElement, '正在测试后端连接...', 'info');
+            
+            try {
+                // 测试健康检查端点
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                const healthData = await healthResponse.json();
+                
+                if (healthResponse.ok) {
+                    showResult(resultElement, 
+                        `✅ 后端服务器运行正常\n` +
+                        `状态: ${healthData.status}\n` +
+                        `时间: ${healthData.timestamp}\n` +
+                        `端口: 3001`, 'success');
+                } else {
+                    showResult(resultElement, 
+                        `❌ 健康检查失败\n` +
+                        `状态码: ${healthResponse.status}`, 'error');
+                }
+            } catch (error) {
+                showResult(resultElement, 
+                    `❌ 无法连接到后端服务器\n` +
+                    `错误: ${error.message}\n` +
+                    `请确保后端服务器正在运行 (npm run dev)`, 'error');
+            }
+        }
+
+        async function testAIChat() {
+            const resultElement = 'ai-result';
+            showResult(resultElement, '正在测试AI聊天功能...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/ai-chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            {
+                                role: 'system',
+                                content: '你是一个智能助手，请用中文回答用户的问题。回答要简洁明了，有帮助性。'
+                            },
+                            {
+                                role: 'user',
+                                content: '你好，请回复"测试成功"'
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 100
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    const reply = data.choices[0].message.content;
+                    showResult(resultElement, 
+                        `✅ AI聊天功能正常\n` +
+                        `回复: ${reply}\n` +
+                        `模型: ${data.model || '未知'}\n` +
+                        `用时: ${data.usage ? data.usage.total_tokens + ' tokens' : '未知'}`, 'success');
+                } else {
+                    showResult(resultElement, 
+                        `❌ 响应格式错误\n` +
+                        `缺少 choices[0].message 字段\n` +
+                        `响应: ${JSON.stringify(data, null, 2)}`, 'error');
+                }
+                
+            } catch (error) {
+                showResult(resultElement, 
+                    `❌ AI聊天测试失败\n` +
+                    `错误: ${error.message}\n` +
+                    `请检查:\n` +
+                    `1. 后端服务器是否运行\n` +
+                    `2. API密钥是否正确配置\n` +
+                    `3. 网络连接是否正常`, 'error');
+            }
+        }
+
+        function openFrontend() {
+            window.open(FRONTEND_URL, '_blank');
+            showResult('ai-result', 
+                `🚀 正在打开前端应用...\n` +
+                `地址: ${FRONTEND_URL}\n` +
+                `请在新页面中测试AI助手功能`, 'info');
+        }
+
+        // 页面加载时自动测试后端连接
+        window.addEventListener('load', function() {
+            setTimeout(testBackendConnection, 1000);
+        });
+    </script>
+</body>
+</html>
